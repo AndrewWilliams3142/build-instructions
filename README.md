@@ -33,11 +33,11 @@ depencencies
 CP2K | Name         | Optional | Build?    | Comment
 ---- | ----         | -------- | ------    | -------
 2a.  | Gnu make     | No       | Available |
-2b.  | Python       | No       | Available | `module load cray-python
-2c.  | Fortran/C/C++| No       | Available | via module `gcc/9.3.0
+2b.  | Python       | No       | Available | `module load cray-python`
+2c.  | Fortran/C/C++| No       | Available | via module `gcc/9.3.0`
 2d.  | BLAS/LAPACK  | No       | Available | via module `cray-libsci`
 2e.  | MPI?SCLAPACK | Yes      | Available | 
-2f.  | FFTW         | Yes      | Avaialble | `module load cray-fftw
+2f.  | FFTW         | Yes      | Avaialble | `module load cray-fftw`
 2g.  | libint       | Yes      | Build     | 
 2h.  | libsmm       | Yes      | No        | Using libxsmm
 2i.  | libxsmm      | Yes      | Build     |
@@ -211,6 +211,19 @@ $ module restore PrgEnv-gnu
 $ module swap gcc gcc/9.3.0
 ```
 
+### Serial
+
+```
+$ mkdir build-openmp
+$ cd build-openmp
+$ CC=cc CXX=CC FC=ftn LDFLAGS=-dynamic ../configure       \
+  --enable-openmp=no --enable-shared=no \
+  --disable-avx512        \
+  --prefix=${CP2K_ROOT}/libs/elpa-openmp
+$ make
+$ make install
+```
+
 ### OpenMP
 
 Just set the OpenMP configure switch
@@ -291,6 +304,17 @@ $ module load cray-fftw
 The build from the autotuning stage is currently problematic on ARCHER
 apparently owing to various non-standard python packages required.
 
+## CP2K popt
+
+The arch file is `$CP2K_ROOT/arch/ARCHER2.popt` a copy of which is
+supplied here [./ARCHER2.popt](./ARCHER2.popt)
+
+And compile
+
+```
+$ cd ${CP2K_ROOT}
+$ make ARCH=ARCHER2 VERSION=popt
+```
 
 ## CP2K psmp
 
@@ -321,24 +345,24 @@ This can be exectuted in the queue system via a script in `${CP2K_ROOT}`
 #SBATCH --time=2:00:0
 #SBATCH --exclusive
 #SBATCH --nodes=1
+#SBATCH --ntasks=2
 #SBATCH --tasks-per-node=2
 #SBATCH --cpus-per-task=2
+#SBATCH --qos=standard
+#SBATCH --partition=standard
 
 # Replace [budget code] below with your budget code (e.g. t01)
 #SBATCH --account=z19
 
 
 
-
 export OMP_NUM_THREADS=2
-export OMP_PLACES=cores
 
 ./tools/regtesting/do_regtest -nobuild -c arch/ARCHER2-regtest.psmp.conf
 ```
 Notes
 
 * Don't forget the `-nobuild`!
-* Significantly longer than 20 minutes will actually be required.
 
 ### Test results
 
